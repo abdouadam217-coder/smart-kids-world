@@ -1,7 +1,5 @@
-# Netlify: الصفحة الرئيسية وملفات التطبيق + صفحة 404 مخصصة
 [build]
-  publish = "."
-
+  publish = .`n
 [[headers]]
   for = "/*"
   [headers.values]
