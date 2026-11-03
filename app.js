@@ -47,6 +47,8 @@ const ICON_BRAIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const QUIZ_LETTERS = ["أ", "ب", "ج", "د"];
 const ICON_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
 const ICON_CLIP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 12-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>';
+const ICON_VOLUME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const ICON_STOP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
 /* ---------- مساعدات ---------- */
 function esc(s) {
@@ -819,9 +821,19 @@ function termCardHTML(t) {
 function renderAnswer(data) {
   const area = $("answerArea");
   if (!area) return;
+  stopSpeaking();
   const tint = tintFor(data.subjectId);
   const sourceHits = matchSources((data.searchText || "") + " " + data.question);
   const sourcesHtml = sourceHits.length ? sourcesCardHTML(sourceHits) : "";
+
+  const listenHtml = ttsAvailable()
+    ? '<div class="q-actions">' +
+        '<button type="button" class="btn-outline btn-sm listen-btn" aria-pressed="false">' +
+          '<span class="listen-ico">' + ICON_VOLUME + "</span>" +
+          "<span>استمع للشرح</span>" +
+        "</button>" +
+      "</div>"
+    : "";
 
   let html =
     '<div class="question-card">' +
@@ -830,6 +842,7 @@ function renderAnswer(data) {
         '<span class="grade-badge">الصف ' + esc(data.grade) + "</span>" +
       "</div>" +
       '<p class="question-text">' + esc(data.question) + "</p>" +
+      listenHtml +
       attachmentsHTML(data.attachments) +
     "</div>";
 
@@ -2119,6 +2132,198 @@ function handleLogout() {
   if (name) name.focus();
 }
 
+/* ---------- الإدخال الصوتي ---------- */
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let recognizer = null;
+let micActive = false;
+
+function setMicUI(active) {
+  micActive = active;
+  const btn = $("micBtn");
+  if (!btn) return;
+  btn.classList.toggle("listening", active);
+  btn.setAttribute("aria-pressed", active ? "true" : "false");
+  const label = btn.querySelector(".mic-label");
+  if (label) label.textContent = active ? "أستمع إليك…" : "تكلّم بسؤالك";
+}
+
+function micNotice(text, isError) {
+  const el = $("micNotice");
+  if (!el) return;
+  if (!text) {
+    el.hidden = true;
+    el.textContent = "";
+    el.classList.remove("is-error");
+    return;
+  }
+  el.textContent = text;
+  el.hidden = false;
+  el.classList.toggle("is-error", !!isError);
+}
+
+function initSpeechInput() {
+  const btn = $("micBtn");
+  if (!btn || !SpeechRec) return;
+  btn.hidden = false;
+
+  btn.addEventListener("click", () => {
+    if (micActive) {
+      try { recognizer.stop(); } catch (e) {}
+      setMicUI(false);
+      return;
+    }
+    micNotice("", false);
+    try {
+      if (!recognizer) {
+        recognizer = new SpeechRec();
+        recognizer.lang = "ar-SA";
+        recognizer.interimResults = false;
+        recognizer.maxAlternatives = 1;
+        recognizer.onresult = (event) => {
+          const said = String(
+            (event.results && event.results[0] && event.results[0][0] && event.results[0][0].transcript) || ""
+          ).trim();
+          const input = $("questionInput");
+          if (input && said) {
+            input.value = (input.value.trim() ? input.value.trim() + " " : "") + said;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            micNotice("تمت إضافة سؤالك صوتيًا — راجعه ثم اضغط «اشرح لي».", false);
+          }
+        };
+        recognizer.onerror = (event) => {
+          setMicUI(false);
+          const code = String((event && event.error) || "");
+          const messages = {
+            "not-allowed": "لم يُسمح باستخدام الميكروفون. اسمح به من إعدادات المتصفح ثم أعد المحاولة.",
+            "service-not-allowed": "خدمة التعرف على الصوت غير متاحة في هذا المتصفح.",
+            "no-speech": "لم أسمع صوتًا. اقترب من الميكروفون وأعد المحاولة.",
+            "audio-capture": "لم أجد ميكروفونًا متصلًا بهذا الجهاز.",
+            "network": "تعذّر الوصول إلى خدمة الصوت. تحقق من اتصال الإنترنت."
+          };
+          micNotice(messages[code] || "تعذّر تسجيل الصوت. جرّب مرة أخرى أو اكتب سؤالك.", true);
+        };
+        recognizer.onend = () => setMicUI(false);
+      }
+      recognizer.start();
+      setMicUI(true);
+      micNotice("تحدّث الآن… سأكتب كلامك في مربع السؤال.", false);
+    } catch (err) {
+      setMicUI(false);
+      micNotice("الميكروفون غير متاح الآن. اكتب سؤالك بالكيبورد.", true);
+    }
+  });
+}
+
+/* ---------- الاستماع للشرح ---------- */
+let ttsButton = null;
+let ttsSpeaking = false;
+
+function ttsAvailable() {
+  return typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    typeof window.SpeechSynthesisUtterance === "function";
+}
+
+function arabicVoice() {
+  if (!ttsAvailable()) return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  return voices.find((v) => /^ar/i.test(v.lang || "")) || null;
+}
+
+function stopSpeaking() {
+  if (ttsSpeaking && ttsAvailable()) {
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+  ttsSpeaking = false;
+  if (ttsButton) {
+    const label = ttsButton.querySelector("span:last-child");
+    if (label) label.textContent = "استمع للشرح";
+    ttsButton.classList.remove("speaking");
+    ttsButton.setAttribute("aria-pressed", "false");
+    const ico = ttsButton.querySelector(".listen-ico");
+    if (ico) ico.innerHTML = ICON_VOLUME;
+    ttsButton = null;
+  }
+}
+
+function listenText(area) {
+  const parts = [];
+  const question = area.querySelector(".question-text");
+  if (question) parts.push(question.textContent.trim());
+  [".answer-card", ".example-card", ".summary-card"].forEach((sel) => {
+    const el = area.querySelector(sel);
+    if (!el) return;
+    const copy = el.cloneNode(true);
+    copy.querySelectorAll("button").forEach((n) => n.remove());
+    const text = (copy.textContent || "").replace(/\s+/g, " ").trim();
+    if (text) parts.push(text);
+  });
+  return parts.join(". ").replace(/\.\s*\.+/g, ".").slice(0, 1600);
+}
+
+function toggleSpeaking(btn, area) {
+  if (!ttsAvailable()) return;
+  if (ttsSpeaking) {
+    stopSpeaking();
+    return;
+  }
+  const text = listenText(area);
+  if (!text) return;
+
+  stopSpeaking();
+  const utter = new window.SpeechSynthesisUtterance(text);
+  utter.lang = "ar-SA";
+  utter.rate = 0.92;
+  utter.pitch = 1;
+  const voice = arabicVoice();
+  if (voice) utter.voice = voice;
+
+  utter.onend = () => stopSpeaking();
+  utter.onerror = () => stopSpeaking();
+
+  ttsButton = btn;
+  ttsSpeaking = true;
+  btn.classList.add("speaking");
+  btn.setAttribute("aria-pressed", "true");
+  const label = btn.querySelector("span:last-child");
+  if (label) label.textContent = "إيقاف الاستماع";
+  const ico = btn.querySelector(".listen-ico");
+  if (ico) ico.innerHTML = ICON_STOP;
+  try {
+    window.speechSynthesis.speak(utter);
+  } catch (e) {
+    stopSpeaking();
+  }
+}
+
+/* ---------- تكبير الخط ---------- */
+const FONT_KEY = "skw_fontsize";
+
+function applyTextSize(big) {
+  document.documentElement.classList.toggle("text-lg", !!big);
+  const btn = $("textSizeBtn");
+  if (!btn) return;
+  btn.setAttribute("aria-pressed", big ? "true" : "false");
+  btn.textContent = big ? "أ-" : "أ+";
+  const title = big ? "إرجاع الخط إلى حجمه الطبيعي" : "تكبير الخط";
+  btn.title = title;
+  btn.setAttribute("aria-label", title);
+}
+
+function initTextSize() {
+  const btn = $("textSizeBtn");
+  if (!btn) return;
+  btn.hidden = false;
+  let big = false;
+  try { big = localStorage.getItem(FONT_KEY) === "lg"; } catch (e) {}
+  applyTextSize(big);
+  btn.addEventListener("click", () => {
+    const next = !document.documentElement.classList.contains("text-lg");
+    applyTextSize(next);
+    try { localStorage.setItem(FONT_KEY, next ? "lg" : "md"); } catch (e) {}
+  });
+}
+
 function init() {
   renderSubjects();
   renderFilters();
@@ -2127,6 +2332,8 @@ function init() {
   applySubjectUI();
   renderExamples();
   renderWeak();
+  initSpeechInput();
+  initTextSize();
 
   const savedStudent = readSavedStudent();
   const nameInput = $("loginUsername");
@@ -2186,6 +2393,11 @@ function init() {
   const answerArea = $("answerArea");
   if (answerArea) {
     answerArea.addEventListener("click", (event) => {
+      const listen = event.target.closest(".listen-btn");
+      if (listen) {
+        toggleSpeaking(listen, answerArea);
+        return;
+      }
       const explain = event.target.closest(".explain-btn");
       if (explain) {
         toggleTermExplain(explain);
