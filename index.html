@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
 
@@ -47,6 +47,8 @@
           <span>ولي الأمر</span>
         </button>
       </nav>
+
+      <button type="button" class="icon-btn textsize-btn" id="textSizeBtn" title="تكبير الخط" aria-label="تكبير الخط" aria-pressed="false" hidden>أ+</button>
 
       <button type="button" class="icon-btn" id="logoutBtn" title="تسجيل الخروج" aria-label="تسجيل الخروج">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
@@ -173,11 +175,16 @@
                 <span>أرفق صورة أو ملفًا</span>
               </button>
               <input type="file" id="attachInput" class="sr-only" multiple accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv" />
+              <button type="button" class="btn-outline btn-sm mic-btn" id="micBtn" aria-pressed="false" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                <span class="mic-label">تكلّم بسؤالك</span>
+              </button>
               <span class="attach-hint">صورة من الكتاب أو ملف نصي (txt / md) — ملفان كحد أقصى.</span>
             </div>
 
             <div id="attachList" class="attach-list" hidden></div>
             <p id="attachNotice" class="attach-notice" hidden></p>
+            <p id="micNotice" class="attach-notice" hidden></p>
 
             <button type="submit" class="btn-primary btn-lg ask-submit" id="askSubmit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -414,7 +421,7 @@
 
   </main>
 
-  <script src="data.js?v=17"></script>
-  <script src="app.js?v=17"></script>
+  <script src="data.js?v=18"></script>
+  <script src="app.js?v=18"></script>
 </body>
 </html>
