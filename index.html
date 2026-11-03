@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6d4df6">
+  <meta name="description" content="عالم الصغار الذكي — مساعد دراسي عربي لطلاب الصفوف 5 إلى 8: اختر صفك ومادتك واكتب سؤالك، وسيصلك شرح بسيط بمثال من الحياة اليومية.">
+  <title>عالم الصغار الذكي | مساعد ذكي لطلاب المرحلة المتوسطة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=17">
+</head>
+<body>
+
+  <!-- ============ الهيدر ============ -->
+  <header class="app-header" id="appHeader" hidden>
+    <div class="header-inner">
+      <a class="brand" href="index.html" id="brandLink" aria-label="عالم الصغار الذكي — الصفحة الرئيسية">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
+        </span>
+        <span class="brand-name">عالم الصغار الذكي</span>
+      </a>
+
+      <div class="header-spacer"></div>
+
+      <nav class="nav" id="mainNav" aria-label="التنقل الرئيسي">
+        <button type="button" class="nav-item active" data-nav="ask" title="اسأل" aria-label="اسأل" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>اسأل</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="weak" title="نقاط ضعفي" aria-label="نقاط ضعفي">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+          <span>نقاط ضعفي</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="progress" title="تقدّمي" aria-label="تقدّمي">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>
+          <span>تقدّمي</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="history" title="السجل" aria-label="السجل">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>
+          <span>السجل</span>
+        </button>
+        <button type="button" class="nav-item" data-nav="parent" title="ولي الأمر" aria-label="ولي الأمر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>ولي الأمر</span>
+        </button>
+      </nav>
+
+      <button type="button" class="icon-btn" id="logoutBtn" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ============ صفحة الدخول ============ -->
+    <section id="loginView" class="login-page">
+      <div class="login-wrap">
+        <span class="brand-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+          <span>عالم الصغار الذكي</span>
+        </span>
+
+        <div class="login-head">
+          <h1 id="loginTitle">أهلًا بعودتك</h1>
+          <p id="loginSub">سجّل الدخول لمتابعة دراستك</p>
+        </div>
+
+        <div class="card login-card">
+          <button type="button" class="btn-google" id="googleBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            المتابعة بحساب Google
+          </button>
+
+          <div class="divider"><span>أو</span></div>
+
+          <form id="loginForm" class="login-form" novalidate>
+            <div class="field">
+              <label class="field-label" for="loginUsername">اسم المستخدم</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input id="loginUsername" type="text" placeholder="اكتب اسمك أو اسم المستخدم" autocomplete="username" />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label class="field-label" for="loginPassword">كلمة المرور</label>
+                <button type="button" class="link link-sm" id="forgotBtn">هل نسيت كلمة المرور؟</button>
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+              </div>
+            </div>
+
+            <p id="loginError" class="login-error" hidden>يرجى كتابة اسم المستخدم وكلمة مرور من 4 أحرف على الأقل.</p>
+            <p id="loginNotice" class="login-notice" hidden></p>
+
+            <button type="submit" class="btn-primary btn-block btn-lg" id="loginSubmit">تسجيل الدخول</button>
+          </form>
+
+          <p class="login-foot">
+            <span id="loginFootText">ليس لديك حساب؟</span>
+            <button type="button" class="link" id="loginModeToggle">أنشئ حسابًا</button>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ صفحة السؤال ============ -->
+    <section id="askView" class="view" hidden>
+      <div class="hero">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 14.5l.6 1.6 1.6.6-1.6.6L19 19l-.6-1.6-1.6-.6 1.6-.6z"/></svg>
+          مساعد ذكي • الصفوف 5 إلى 8
+        </span>
+        <h1 class="hero-title">سؤالك… وشرح بمستوى صفك</h1>
+        <p class="hero-sub">اختر صفك والمادة، واكتب سؤالك بكلامك العادي. سأشرح لك بجمل قصيرة، ثم بمثال من حياتك اليومية.</p>
+      </div>
+
+      <section class="card ask-card">
+        <div class="step">
+          <div class="step-label">
+            <span class="step-num">1</span>
+            <svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+            <h2 class="step-title">صفك الدراسي</h2>
+          </div>
+          <div id="gradePills" class="grade-pills">
+            <button type="button" class="grade-pill" data-grade="5" aria-pressed="false">الصف 5</button>
+            <button type="button" class="grade-pill" data-grade="6" aria-pressed="false">الصف 6</button>
+            <button type="button" class="grade-pill" data-grade="7" aria-pressed="false">الصف 7</button>
+            <button type="button" class="grade-pill" data-grade="8" aria-pressed="false">الصف 8</button>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-label">
+            <span class="step-num">2</span>
+            <svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <h2 class="step-title">المادة</h2>
+          </div>
+          <div id="subjectGrid" class="subject-grid"></div>
+        </div>
+
+        <div class="step step-last">
+          <div class="step-label">
+            <span class="step-num">3</span>
+            <svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 14.5l.6 1.6 1.6.6-1.6.6L19 19l-.6-1.6-1.6-.6 1.6-.6z"/></svg>
+            <h2 class="step-title">سؤالك</h2>
+          </div>
+
+          <form id="askForm" class="ask-form" novalidate>
+            <div class="examples">
+              <span class="examples-label">جرّب مثالًا:</span>
+              <div id="examples" class="example-chips"></div>
+            </div>
+            <label class="sr-only" for="questionInput">سؤالك</label>
+            <textarea id="questionInput" rows="4" maxlength="500" placeholder="اكتب سؤالك هنا بكلامك العادي… مثل: ليش البحر مالح؟"></textarea>
+            <p id="askError" class="ask-error" hidden>اكتب سؤالك أولًا، ثم اضغط «اشرح لي».</p>
+
+            <div class="attach-row">
+              <button type="button" class="btn-outline btn-sm attach-btn" id="attachBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 12-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>
+                <span>أرفق صورة أو ملفًا</span>
+              </button>
+              <input type="file" id="attachInput" class="sr-only" multiple accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv" />
+              <span class="attach-hint">صورة من الكتاب أو ملف نصي (txt / md) — ملفان كحد أقصى.</span>
+            </div>
+
+            <div id="attachList" class="attach-list" hidden></div>
+            <p id="attachNotice" class="attach-notice" hidden></p>
+
+            <button type="submit" class="btn-primary btn-lg ask-submit" id="askSubmit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>اشرح لي</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <div id="answerArea" class="answer-area" hidden></div>
+    </section>
+
+    <!-- ============ صفحة نقاط ضعفي ============ -->
+    <section id="weakView" class="view" hidden>
+      <header class="page-head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+          متابعة تقدمك
+        </span>
+        <h1>نقاط ضعفي</h1>
+        <p>أكثر المصطلحات التي سألت عنها. ابدأ بالتي في الأعلى، واضغط «اشرح أبسط» لتوضيحها أكثر.</p>
+      </header>
+
+      <div class="filter-chips" id="weakFilters" role="group" aria-label="تصفية حسب المادة"></div>
+
+      <div id="weakEmpty" class="empty-state" hidden>
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h2 id="weakEmptyTitle">قائمتك فارغة حتى الآن</h2>
+        <p>ابدأ بسؤالك الأول، وسأجمع لك كل مصطلح صعب لتتابع تقدمك هنا.</p>
+        <button type="button" class="btn-primary" id="weakEmptyCta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          اسأل سؤالك الأول
+        </button>
+      </div>
+
+      <ol id="weakList" class="weak-list" hidden></ol>
+
+      <div class="weak-footer">
+        <button type="button" class="btn-outline btn-sm" id="clearWeak">مسح القائمة</button>
+      </div>
+    </section>
+
+    <!-- ============ صفحة تقدّمي ============ -->
+    <section id="progressView" class="view" hidden>
+      <header class="page-head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>
+          متابعة تقدمك
+        </span>
+        <h1>تقدّمي</h1>
+        <p>نلخّص لك عدد أسئلتك ودقة تدريبك هذا الأسبوع مقارنة بالأسبوع الماضي.</p>
+      </header>
+
+      <section class="stats-card">
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-value" id="statQuestions">0</div>
+            <div class="stat-label">سؤالًا سألته</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statAccuracy">—</div>
+            <div class="stat-label">دقة التدريب</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statWeek">0</div>
+            <div class="stat-label">سؤالًا هذا الأسبوع</div>
+          </div>
+        </div>
+        <p class="progress-trend" id="progressTrend"></p>
+      </section>
+
+      <section class="card progress-card">
+        <h2 class="progress-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          آخر أسئلتك
+        </h2>
+        <ol id="progressHistory" class="history-list"></ol>
+        <div id="progressEmpty" class="progress-empty" hidden>
+          <p>لم تسأل أي سؤال بعد. ابدأ بسؤالك الأول وسترى تقدمك هنا.</p>
+          <button type="button" class="btn-primary" id="progressCta">اسأل سؤالك الأول</button>
+        </div>
+        <div class="progress-more">
+          <button type="button" class="btn-outline" id="progressAllBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>
+            عرض السجل الكامل
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ صفحة السجل ============ -->
+    <section id="historyView" class="view" hidden>
+      <header class="page-head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>
+          محفوظ على جهازك
+        </span>
+        <h1>السجل</h1>
+        <p>كل أسئلتك محفوظة هنا تلقائيًا. ابحث عنها، أعد فتح الشرح، أو خذ نسخة احتياطية تحفظها في مكان آمن.</p>
+      </header>
+
+      <section class="card history-card">
+        <div class="history-search-wrap">
+          <svg class="history-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <label class="sr-only" for="historySearch">ابحث في أسئلتك</label>
+          <input id="historySearch" type="search" placeholder="ابحث في أسئلتك… مثل: الكسر" autocomplete="off" />
+        </div>
+
+        <div class="filter-chips" id="historyFilters" role="group" aria-label="تصفية السجل حسب المادة"></div>
+
+        <p class="history-count" id="historyCount"></p>
+        <ol id="historyFull" class="history-full"></ol>
+
+        <div id="historyEmpty" class="empty-state" hidden>
+          <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>
+          </div>
+          <h2 id="historyEmptyTitle">سجلك فارغ حتى الآن</h2>
+          <p id="historyEmptyText">ابدأ بسؤالك الأول، وسيُحفظ هنا لتتمكن من الرجوع إليه في أي وقت.</p>
+          <button type="button" class="btn-primary" id="historyEmptyCta">اسأل سؤالك الأول</button>
+        </div>
+
+        <div class="history-actions">
+          <button type="button" class="btn-outline" id="historyExport">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            نسخة احتياطية
+          </button>
+          <button type="button" class="btn-outline" id="historyImportBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg>
+            استعادة نسخة
+          </button>
+          <input type="file" id="historyImport" class="sr-only" accept=".json,application/json" />
+          <button type="button" class="btn-outline btn-danger" id="historyClear">حذف السجل</button>
+        </div>
+
+        <p id="historyNotice" class="login-notice" hidden></p>
+        <p id="historyError" class="login-error" hidden></p>
+      </section>
+
+      <section class="card storage-card">
+        <h2 class="progress-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+          حفظ البيانات
+        </h2>
+        <p class="sources-sub">
+          يُحفظ كل شيء تلقائيًا على هذا الجهاز عند كل سؤال أو اختبار: الأسئلة، المرفقات، نقاط الضعف،
+          نتائج الاختبارات، وملفات المعلم. لا تحتاج إلى زر حفظ.
+        </p>
+
+        <div class="storage-meter" role="img" aria-label="مساحة التخزين المستخدمة">
+          <span id="storageFill"></span>
+        </div>
+        <p class="storage-text" id="storageText"></p>
+
+        <p class="storage-sub">تفصيل بيانات حسابك الحالي:</p>
+        <ul class="storage-list" id="storageList"></ul>
+
+        <p class="parent-hint">
+          النسخة الاحتياطية ملف JSON صغير يمكنك حفظه أو إرساله لنفسك، ثم استعادته على جهاز آخر.
+          البيانات تبقى في متصفحك ولا تُرسل إلى أي خادم.
+        </p>
+      </section>
+    </section>
+
+    <!-- ============ صفحة ولي الأمر ============ -->
+    <section id="parentView" class="view" hidden>
+      <div class="hero hero-compact">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          متابعة ولي الأمر
+        </span>
+        <h1 class="hero-title">تقرير ولي الأمر</h1>
+        <p class="hero-sub">نجمع لك ملخّصًا قصيرًا عن أسئلة الطالب ونقاط ضعفه ودقة تدريبه، ويمكنك إرساله إلى بريدك.</p>
+      </div>
+
+      <section class="card parent-card">
+        <form id="parentForm" class="parent-form" novalidate>
+          <div class="field">
+            <label class="field-label" for="parentEmail">بريد ولي الأمر</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <input id="parentEmail" type="email" dir="ltr" placeholder="parent@example.com" autocomplete="email" />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" id="parentSave">حفظ البريد</button>
+        </form>
+
+        <p id="parentNotice" class="login-notice" hidden></p>
+        <p id="parentError" class="login-error" hidden></p>
+
+        <div class="parent-report" id="parentReport"></div>
+
+        <div class="parent-actions">
+          <button type="button" class="btn-outline" id="sendReportBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+            أرسل التقرير الآن
+          </button>
+        </div>
+        <p class="parent-hint">يفتح التقرير في تطبيق البريد على جهازك — لا تُرسل البيانات إلى أي خادم.</p>
+      </section>
+
+      <section class="card sources-card">
+        <h2 class="progress-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
+          ملفات المعلم / ولي الأمر
+        </h2>
+        <p class="sources-sub">
+          أضف ملف ملاحظات نصيًا (txt أو md) فيه شرح الدرس أو المصطلحات. عند سؤال الطالب عن شيء
+          موجود في الملف، ستظهر الملاحظة داخل الشرح تحت عنوان «من ملفات معلمك».
+        </p>
+        <p class="sources-format">
+          صيغة اختيارية لكل سطر: <code>المصطلح | التعريف | مثال</code> — أو اكتب السطر كملاحظة عادية.
+        </p>
+
+        <div class="sources-actions">
+          <button type="button" class="btn-outline" id="sourceBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            أضف ملفًا نصيًا
+          </button>
+          <input type="file" id="sourceInput" class="sr-only" multiple accept=".txt,.md,.csv,text/plain" />
+          <span class="sources-count" id="sourcesCount"></span>
+        </div>
+
+        <p id="sourceNotice" class="login-notice" hidden></p>
+        <p id="sourceError" class="login-error" hidden></p>
+
+        <ul id="sourceList" class="source-list"></ul>
+        <p id="sourceEmpty" class="sources-empty" hidden>لا توجد ملفات مضافة بعد — أضف ملف الدرس الأول ليستفيد منه الطالب.</p>
+        <p class="parent-hint">الملفات تُحفظ على هذا الجهاز فقط (localStorage)، ولا تُرسل إلى أي خادم. الحد: 5 ملفات، و2 ميجابايت للملف.</p>
+      </section>
+    </section>
+
+  </main>
+
+  <script src="data.js?v=17"></script>
+  <script src="app.js?v=17"></script>
+</body>
+</html>
