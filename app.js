@@ -2355,18 +2355,6 @@ function init() {
     });
   }
 
-  const googleBtn = $("googleBtn");
-  if (googleBtn) {
-    googleBtn.addEventListener("click", () => {
-      const notice = $("loginNotice");
-      if (!notice) return;
-      notice.textContent = "الدخول بحساب Google غير متاح في هذه النسخة المحلية — استخدم اسمك وكلمة المرور بالأسفل.";
-      notice.hidden = false;
-      const error = $("loginError");
-      if (error) error.hidden = true;
-    });
-  }
-
   const forgotBtn = $("forgotBtn");
   if (forgotBtn) {
     forgotBtn.addEventListener("click", () => {
