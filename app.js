@@ -64,14 +64,51 @@ function normalize(s) {
     .replace(/[\u0623\u0622\u0671]/g, "\u0627")
     .replace(/[\u0625]/g, "\u0627")
     .replace(/[\u0624]/g, "\u0648")
-    .replace(/[\u0626]/g, "\u064A");
+    .replace(/[\u0626]/g, "\u064A")
+    .replace(/\u0629/g, "\u0647")
+    .replace(/\u0649/g, "\u064A");
+}
+
+/* كلمات إنجليزية شائعة لا تصلح للبحث وحدها */
+const EN_STOP = new Set([
+  "a", "an", "the", "and", "but", "or", "so", "if", "in", "on", "at", "to", "of", "for", "with",
+  "is", "are", "am", "was", "were", "be", "been", "do", "does", "did", "have", "has", "had",
+  "i", "you", "he", "she", "it", "we", "they", "my", "your", "his", "her", "its", "our", "their",
+  "this", "that", "these", "those", "who", "what", "where", "when", "why", "how", "which",
+  "can", "could", "may", "might", "must", "should", "will", "would", "not", "no", "yes",
+  "one", "two", "ing"
+]);
+
+/* مطابقة اسم المصطلح داخل السؤال بشرط ألا يكون جزءًا من كلمة أطول */
+function containsName(norm, name) {
+  let i = norm.indexOf(name);
+  while (i !== -1) {
+    const after = norm[i + name.length];
+    if (!after || !/[\u0621-\u064A]/.test(after)) return true;
+    i = norm.indexOf(name, i + 1);
+  }
+  return false;
 }
 
 function scoreTerm(term, norm) {
   let score = 0;
+  const arName = normalize(term.ar);
+  const enName = normalize(term.en);
+  if (arName && containsName(norm, arName)) score += 4 + Math.min(3, arName.length / 6);
+  if (enName && /^[a-z ]+$/.test(enName) && enName.length > 3) {
+    const enRe = new RegExp("\\b" + enName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b");
+    if (enRe.test(norm)) score += 3;
+  }
   for (const kw of term.keywords) {
     const k = normalize(kw);
-    if (k && norm.includes(k)) score += k.includes(" ") ? 3 : 1;
+    if (!k) continue;
+    if (/^[a-z]+$/.test(k)) {
+      if (EN_STOP.has(k) || k.length <= 3) continue;
+      const re = new RegExp("\\b" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b");
+      if (re.test(norm)) score += 1;
+      continue;
+    }
+    if (norm.includes(k)) score += k.includes(" ") ? 5 : 1;
   }
   return score;
 }
@@ -83,7 +120,12 @@ function pickTerms(subjectId, text) {
     .map((t) => ({ t, s: scoreTerm(t, norm) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s);
-  return { subject, terms: scored.slice(0, 2).map((x) => x.t) };
+  const best = scored.length ? scored[0].s : 0;
+  const chosen = scored
+    .filter((x, i) => i === 0 || x.s >= best * 0.45)
+    .slice(0, 2)
+    .map((x) => x.t);
+  return { subject, terms: chosen };
 }
 
 function sentences(text) {
@@ -751,7 +793,7 @@ function buildAnswerData(subjectId, question) {
       terms: [],
       bullets: [],
       example: "",
-      suggestions: (SUGGESTIONS[subject.id] || []).slice(0, 3)
+      suggestions: (SUGGESTIONS[subject.id] || []).slice(0, 6)
     };
   }
 
