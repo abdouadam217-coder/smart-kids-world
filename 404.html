@@ -17,7 +17,7 @@
       function add() {
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = prefix() + "styles.css?v=27";
+        link.href = prefix() + "styles.css?v=31";
         link.onerror = function () {
           if (tries <= depth) { tries++; add(); }
         };
@@ -30,7 +30,7 @@
       add();
     })();
   </script>
-  <noscript><link rel="stylesheet" href="styles.css?v=27"></noscript>
+  <noscript><link rel="stylesheet" href="styles.css?v=31"></noscript>
 </head>
 <body>
   <main class="notfound-page">
