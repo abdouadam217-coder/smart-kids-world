@@ -487,6 +487,33 @@ function buildQuiz(terms, subjectId) {
         why: "«" + term.ar + "»: " + shortText(term.simple)
       });
     }
+
+    /* سؤال صعب: اختيار المثال الذي يوضح المصطلح من بين أمثلة متشابهة */
+    const targetExample = shortText(exampleLine);
+    if (targetExample) {
+      const usedExamples = new Set([targetExample]);
+      const hardTerms = [];
+      for (const cand of seededShuffle(allTerms.filter((t) => t.key !== term.key), seed + 61)) {
+        const candExample = shortText(exampleText(cand));
+        if (!candExample || usedExamples.has(candExample)) continue;
+        usedExamples.add(candExample);
+        hardTerms.push(cand);
+        if (hardTerms.length === 3) break;
+      }
+      if (hardTerms.length === 3) {
+        const hardOptions = seededShuffle([term].concat(hardTerms), seed + 71)
+          .map((t) => shortText(exampleText(t)));
+        const hardAnswer = hardOptions.indexOf(targetExample);
+        pool.push({
+          termKey: term.key,
+          question: "أي مثال يوضح «" + term.ar + "»؟",
+          options: hardOptions,
+          answer: hardAnswer,
+          difficulty: "صعب",
+          why: "«" + term.ar + "»: " + shortText(term.simple)
+        });
+      }
+    }
   });
 
   const seen = new Set();
