@@ -11,23 +11,30 @@
   <script>
     /* يختار المسار الصحيح للملفات مهما كان عمق الرابط (صفحة 404 تُعرض من أي مسار) */
     (function () {
-      var depth = location.pathname.split("/").filter(Boolean).length;
+      var parts = location.pathname.split("/").filter(Boolean);
+      var repoIndex = parts.indexOf("smart-kids-world");
+      var base = repoIndex >= 0 ? "/" + parts.slice(0, repoIndex + 1).join("/") + "/" : "/";
+      var depth = parts.length;
       var tries = 0;
-      function prefix() { return new Array(tries + 1).join("../"); }
-      function add() {
+
+      function apply(path) {
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = prefix() + "styles.css?v=31";
+        link.href = path + "styles.css?v=31";
         link.onerror = function () {
-          if (tries <= depth) { tries++; add(); }
+          if (tries > depth) return;
+          tries++;
+          apply(new Array(tries + 1).join("../"));
         };
         link.onload = function () {
           var home = document.getElementById("homeLink");
-          if (home) home.href = prefix() + "index.html";
+          if (home) home.href = path + "index.html";
         };
         document.head.appendChild(link);
       }
-      add();
+
+      /* على GitHub Pages نعرف جذر المستودع مباشرة؛ وإلا نجرّب الارتفاع درجة درجة */
+      apply(repoIndex >= 0 ? base : "");
     })();
   </script>
   <noscript><link rel="stylesheet" href="styles.css?v=31"></noscript>
