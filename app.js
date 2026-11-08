@@ -12,7 +12,7 @@ const state = {
   busy: false,
   answerTimer: null,
   attachments: [],
-  quizCount: 4,
+  quizCount: 10,
   quizPool: []
 };
 
@@ -432,23 +432,29 @@ function pointsText(n) {
   return count + " نقطة";
 }
 
-const QUIZ_COUNTS = [4, 6, 8, 10];
+const QUIZ_COUNTS = [10, 20, 30, 50, 100];
 
 function buildQuiz(terms, subjectId) {
   const subject = SUBJECTS[subjectId];
   if (!subject || !terms.length) return [];
-  const chosenKeys = new Set(terms.map((t) => t.key));
-  const others = subject.terms.filter((t) => !chosenKeys.has(t.key));
+  const matched = terms.slice(0, 4);
+  const matchedKeys = new Set(matched.map((t) => t.key));
+  const allTerms = subject.terms;
+  const others = allTerms.filter((t) => !matchedKeys.has(t.key));
+  const wideSeed = hashString(matched.map((t) => t.key).join("|") + "::wide::" + subjectId);
+  const extra = seededShuffle(others, wideSeed).slice(0, 50);
+  const order = matched.concat(extra);
   const pool = [];
 
-  terms.slice(0, 4).forEach((term, index) => {
+  order.forEach((term, index) => {
     const seed = hashString(term.key + "::pool::" + index);
-    const distractors = seededShuffle(others, seed).slice(0, 3);
+    const distractors = seededShuffle(allTerms.filter((t) => t.key !== term.key), seed).slice(0, 3);
 
     const definitionOptions = seededShuffle([term].concat(distractors), seed + 17)
       .map((t) => shortText(t.simple));
     const definitionAnswer = definitionOptions.indexOf(shortText(term.simple));
     pool.push({
+      termKey: term.key,
       question: "ما معنى «" + term.ar + "»؟",
       options: definitionOptions,
       answer: definitionAnswer,
@@ -460,6 +466,7 @@ function buildQuiz(terms, subjectId) {
     const nameOptions = seededShuffle([term].concat(distractors), seed + 31).map((t) => t.ar);
     const nameAnswer = nameOptions.indexOf(term.ar);
     pool.push({
+      termKey: term.key,
       question: "أي مصطلح يطابق هذا التعريف: «" + clue + "»؟",
       options: nameOptions,
       answer: nameAnswer,
@@ -472,6 +479,7 @@ function buildQuiz(terms, subjectId) {
       const exampleOptions = seededShuffle([term].concat(distractors), seed + 47).map((t) => t.ar);
       const exampleAnswer = exampleOptions.indexOf(term.ar);
       pool.push({
+        termKey: term.key,
         question: "أي مصطلح ينطبق عليه هذا المثال: «" + shortText(exampleLine) + "»؟",
         options: exampleOptions,
         answer: exampleAnswer,
@@ -488,18 +496,22 @@ function buildQuiz(terms, subjectId) {
     return true;
   });
 
-  return seededShuffle(unique, hashString(terms.map((t) => t.key).join("|") + subjectId));
+  /* أسئلة الدرس أولًا، ثم بقية أسئلة المادة ليتسع الاختبار حتى 100 سؤال */
+  const head = unique.filter((q) => matchedKeys.has(q.termKey));
+  const tail = unique.filter((q) => !matchedKeys.has(q.termKey));
+  return head.concat(seededShuffle(tail, wideSeed + 7));
 }
 
 function quizCounts(total) {
-  const list = QUIZ_COUNTS.filter((n) => n < total);
-  list.push(total);
-  return list.filter((n, i, arr) => n > 0 && arr.indexOf(n) === i).sort((a, b) => a - b);
+  const list = QUIZ_COUNTS.filter((n) => n <= total);
+  if (!list.length) return total > 0 ? [total] : [];
+  if (total < 100 && list[list.length - 1] !== total) list.push(total);
+  return list.filter((n, i, arr) => arr.indexOf(n) === i).sort((a, b) => a - b);
 }
 
 function quizCountFor(total) {
   const available = quizCounts(total);
-  const saved = Number(state.quizCount) || 4;
+  const saved = Number(state.quizCount) || 10;
   if (available.indexOf(saved) !== -1) return saved;
   const next = available.find((n) => n >= saved);
   return next || available[available.length - 1];
