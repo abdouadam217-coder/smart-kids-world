@@ -20,7 +20,7 @@
       function apply(path) {
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = path + "styles.css?v=31";
+        link.href = path + "styles.css?v=32";
         link.onerror = function () {
           if (tries > depth) return;
           tries++;
@@ -37,7 +37,7 @@
       apply(repoIndex >= 0 ? base : "");
     })();
   </script>
-  <noscript><link rel="stylesheet" href="styles.css?v=31"></noscript>
+  <noscript><link rel="stylesheet" href="styles.css?v=32"></noscript>
 </head>
 <body>
   <main class="notfound-page">
