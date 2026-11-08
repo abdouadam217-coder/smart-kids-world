@@ -60,13 +60,40 @@ function esc(s) {
 function normalize(s) {
   return String(s || "")
     .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
     .replace(/[\u0623\u0622\u0671]/g, "\u0627")
     .replace(/[\u0625]/g, "\u0627")
     .replace(/[\u0624]/g, "\u0648")
     .replace(/[\u0626]/g, "\u064A")
     .replace(/\u0629/g, "\u0647")
-    .replace(/\u0649/g, "\u064A");
+    .replace(/\u0649/g, "\u064A")
+    .replace(/[-_/\\]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/* كلمات لا نحذف منها «ال» لأنها ليست أداة تعريف */
+const AL_KEEP = new Set([
+  "الله", "لله", "اللهم", "الذي", "التي", "الذين", "اللاتي", "اللواتي",
+  "الان", "الاولي", "الاخره", "الاخري", "اله", "الاء"
+]);
+
+/* نحذف «ال» التعريف من بداية الكلمات لمقارنة أدق */
+function stripAl(s) {
+  const parts = String(s || "").split(" ");
+  for (let i = 0; i < parts.length; i++) {
+    const w = parts[i];
+    if (w.length > 3 && w.startsWith("\u0627\u0644") && !AL_KEEP.has(w)) parts[i] = w.slice(2);
+  }
+  return parts.join(" ");
+}
+
+function hasPhrase(norm, phrase) {
+  const safe = String(phrase)
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\s+/g, "\\s+");
+  return new RegExp("\\b" + safe + "\\b").test(norm);
 }
 
 /* كلمات إنجليزية شائعة لا تصلح للبحث وحدها */
@@ -90,32 +117,36 @@ function containsName(norm, name) {
   return false;
 }
 
+const EN_NAME_RE = /^[a-z' ]+$/;
+
 function scoreTerm(term, norm) {
   let score = 0;
-  const arName = normalize(term.ar);
-  const enName = normalize(term.en);
-  if (arName && containsName(norm, arName)) score += 4 + Math.min(3, arName.length / 6);
-  if (enName && /^[a-z ]+$/.test(enName) && enName.length > 3) {
-    const enRe = new RegExp("\\b" + enName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b");
-    if (enRe.test(norm)) score += 3;
+  const arName = stripAl(normalize(term.ar));
+  const enName = stripAl(normalize(term.en));
+  if (arName && containsName(norm, arName)) score += 6 + Math.min(4, arName.length / 5) + arName.length / 1000;
+  if (enName && EN_NAME_RE.test(enName) && enName.length > 3 && hasPhrase(norm, enName)) {
+    score += 5 + Math.min(3, enName.length / 10);
   }
+  const seen = new Set();
   for (const kw of term.keywords) {
-    const k = normalize(kw);
-    if (!k) continue;
-    if (/^[a-z]+$/.test(k)) {
-      if (EN_STOP.has(k) || k.length <= 3) continue;
-      const re = new RegExp("\\b" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b");
-      if (re.test(norm)) score += 1;
+    const k = stripAl(normalize(kw));
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    const tokens = k.split(" ").filter(Boolean);
+    if (/^[a-z' ]+$/.test(k)) {
+      if (tokens.every((w) => EN_STOP.has(w))) continue;
+      if (tokens.length === 1 && (EN_STOP.has(tokens[0]) || tokens[0].length <= 3)) continue;
+      if (hasPhrase(norm, k)) score += tokens.length > 1 ? 5 : 1;
       continue;
     }
-    if (norm.includes(k)) score += k.includes(" ") ? 5 : 1;
+    if (norm.includes(k)) score += tokens.length > 1 ? 5 : 1;
   }
   return score;
 }
 
 function pickTerms(subjectId, text) {
   const subject = SUBJECTS[subjectId] || SUBJECTS[DEFAULT_SUBJECT];
-  const norm = normalize(text);
+  const norm = stripAl(normalize(text));
   const scored = subject.terms
     .map((t) => ({ t, s: scoreTerm(t, norm) }))
     .filter((x) => x.s > 0)
