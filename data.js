@@ -744,7 +744,7 @@ const SUBJECTS = {
         simple: "دورة المياه حركة الماء بين الأرض والسماء. يتبخر الماء، ثم يتكاثف في السحب، ثم يسقط مطرًا.",
         example: "ماء البحر يتبخر بأشعة الشمس، ويكوّن سحبًا، ثم يعود مطرًا إلى الأرض.",
         easier: "الماء يذهب إلى السماء ثم يعود إلى الأرض في رحلة متكررة.",
-        keywords: ["دورة المياه", "تبخر", "مطر", "water cycle"]
+        keywords: ["دورة المياه", "تبخر", "بخار", "بخار الماء", "مطر", "water cycle"]
       },
       {
         key: "science::states",
@@ -1518,7 +1518,7 @@ const SUBJECTS = {
         simple: "الانصهار تحول الصلب إلى سائل، والتبخر تحول السائل إلى غاز، والتجمد عكسه.",
         example: "الثلج ينصهر، والماء يتبخر، والثلاجة تجمد الماء.",
         easier: "المادة تتحول بين صلب وسائل وغاز.",
-        keywords: ["انصهار", "تبخر", "تجمد", "melting", "evaporation"]
+        keywords: ["انصهار", "تبخر", "تجمد", "بخار", "بخار الماء", "melting", "evaporation"]
       }
     ]
   },
@@ -4105,6 +4105,127 @@ const SUBJECTS = {
       }
     ]
   }
+};
+
+/* ---------- الرموز العلمية ---------- */
+const SCI_SYMBOLS = {
+  math: [
+    { s: "π", ar: "باي", en: "pi", ex: "محيط الدائرة = 2πr", match: ["دائره", "محيط", "circle", "باي"] },
+    { s: "×", ar: "الضرب", en: "times", ex: "4 × 3 = 12", match: ["ضرب", "multiplication", "مساحه", "حجم"] },
+    { s: "÷", ar: "القسمة", en: "divided by", ex: "12 ÷ 3 = 4", match: ["قسمه", "division", "معدل", "متوسط"] },
+    { s: "+", ar: "الجمع", en: "plus", ex: "5 + 3 = 8", match: ["جمع", "addition"] },
+    { s: "−", ar: "الطرح", en: "minus", ex: "9 − 4 = 5", match: ["طرح", "subtraction", "فرق"] },
+    { s: "=", ar: "يساوي", en: "equals", ex: "3 + 4 = 7", match: ["معادله", "equation", "تساوي"] },
+    { s: "√", ar: "الجذر التربيعي", en: "square root", ex: "√49 = 7", match: ["جذر", "root"] },
+    { s: "²", ar: "تربيع", en: "squared", ex: "5² = 25", match: ["مساحه", "تربيع", "مربع", "square"] },
+    { s: "≈", ar: "تقريبًا يساوي", en: "approximately", ex: "π ≈ 3.14", match: ["تقريب", "تقدير", "round"] },
+    { s: "°", ar: "درجة", en: "degree", ex: "الزاوية القائمة = 90°", match: ["زاويه", "زوايا", "مثلث", "angle"] },
+    { s: "%", ar: "بالمئة", en: "percent", ex: "25% = 0.25", match: ["نسبه", "مئويه", "percent"] },
+    { s: "Δ", ar: "التغير", en: "delta / change", ex: "الميل = Δص ÷ Δس", match: ["ميل", "تغير", "slope"] },
+    { s: "∠", ar: "زاوية", en: "angle", ex: "∠أ = 60°", match: ["زاويه", "مثلث", "angle"] },
+    { s: "<", ar: "أصغر من", en: "less than", ex: "3 < 5", match: ["اصغر", "مقارنه", "inequal"] },
+    { s: ">", ar: "أكبر من", en: "greater than", ex: "8 > 2", match: ["اكبر", "مقارنه", "inequal"] },
+    { s: "≤", ar: "أصغر أو يساوي", en: "less or equal", ex: "س ≤ 10", match: ["اصغر", "inequal"] },
+    { s: "≥", ar: "أكبر أو يساوي", en: "greater or equal", ex: "س ≥ 4", match: ["اكبر", "inequal"] },
+    { s: "≠", ar: "لا يساوي", en: "not equal", ex: "3 ≠ 4", match: ["لا يساوي", "inequal"] },
+    { s: "∥", ar: "متوازي", en: "parallel", ex: "أضلاع متوازية", match: ["متوازي", "parallel"] },
+    { s: "⊥", ar: "عمودي", en: "perpendicular", ex: "الارتفاع ⊥ القاعدة", match: ["عمودي", "ارتفاع", "perpendicular"] }
+  ],
+  science: [
+    { s: "°C", ar: "درجة مئوية", en: "Celsius", ex: "الماء يغلي عند 100°C", match: ["حراره", "درجه", "طقس", "مناخ"] },
+    { s: "°F", ar: "درجة فهرنهايت", en: "Fahrenheit", ex: "98°F", match: ["حراره", "فهرنهايت"] },
+    { s: "kg", ar: "كيلوغرام", en: "kilogram", ex: "الكتلة = 5 kg", match: ["كتله", "وزن", "mass", "density"] },
+    { s: "g", ar: "غرام", en: "gram", ex: "5 g", match: ["كتله", "غرام", "mass"] },
+    { s: "L", ar: "لتر", en: "liter", ex: "1 L = 1000 mL", match: ["حجم", "سعه", "volume"] },
+    { s: "mL", ar: "مليلتر", en: "milliliter", ex: "250 mL", match: ["حجم", "سعه", "milliliter"] },
+    { s: "m/s", ar: "متر لكل ثانية", en: "meter per second", ex: "السرعة = المسافة ÷ الزمن", match: ["سرعه", "speed", "مسافه"] },
+    { s: "N", ar: "نيوتن", en: "newton", ex: "القوة = 10 N", match: ["قوه", "force", "نيوتن", "وزن"] },
+    { s: "J", ar: "جول", en: "joule", ex: "الطاقة = 20 J", match: ["طاقه", "energy", "شغل", "work"] },
+    { s: "W", ar: "واط", en: "watt", ex: "القدرة = 60 W", match: ["قدره", "كهرباء", "watt", "power"] },
+    { s: "V", ar: "فولت", en: "volt", ex: "جهد البطارية = 1.5 V", match: ["جهد", "كهرباء", "volt", "بطاريه"] },
+    { s: "A", ar: "أمبير", en: "ampere", ex: "التيار = 2 A", match: ["تيار", "كهرباء", "ampere", "current"] },
+    { s: "H₂O", ar: "الماء", en: "water", ex: "جزيء الماء H₂O", match: ["ماء", "جزيء", "water", "بخار", "سحاب"] },
+    { s: "O₂", ar: "الأكسجين", en: "oxygen", ex: "O₂ لازم للتنفس", match: ["تنفس", "اكسجين", "oxygen", "احتراق"] },
+    { s: "CO₂", ar: "ثاني أكسيد الكربون", en: "carbon dioxide", ex: "نطرد CO₂ مع الزفير", match: ["تنفس", "كربون", "carbon", "احتباس"] },
+    { s: "pH", ar: "الرقم الهيدروجيني", en: "pH", ex: "pH = 7 متعادل", match: ["حمض", "قاعده", "ph", "حموضه"] },
+    { s: "→", ar: "يؤدي إلى", en: "leads to", ex: "الصلب → سائل", match: ["تحول", "تغير", "تفاعل", "change"] },
+    { s: "Δ", ar: "التغير", en: "change", ex: "Δ درجة الحرارة", match: ["تغير", "فرق", "change"] },
+    { s: "Hz", ar: "هرتز", en: "hertz", ex: "التردد = 440 Hz", match: ["تردد", "صوت", "pitch", "sound"] }
+  ]
+};
+
+/* ---------- قوانين مختصرة تظهر داخل بطاقة المصطلح ---------- */
+const TERM_FORMULAS = {
+  "math::fraction": "الكسر = البسط ÷ المقام",
+  "math::decimal": "0.5 = 5 ÷ 10",
+  "math::percentage": "النسبة % = (الجزء ÷ الكل) × 100",
+  "math::area": "مساحة المستطيل = الطول × العرض",
+  "math::perimeter": "محيط المستطيل = 2 × (الطول + العرض)",
+  "math::average": "المتوسط = مجموع القيم ÷ عدد القيم",
+  "math::ratio": "أ ÷ ب = ج ÷ د",
+  "math::equation": "س + 5 = 12 ← س = 7",
+  "math::rounding": "4.6 ≈ 5",
+  "math::gcf": "ق.م.أ (12، 18) = 6",
+  "math::lcm": "م.م.أ (4، 6) = 12",
+  "math::exponents": "2³ = 2 × 2 × 2 = 8",
+  "math::squareroot": "√49 = 7",
+  "math::inequalities": "س > 3، س ≤ 10",
+  "math::unitrate": "المعدل = الكمية ÷ الزمن",
+  "math::trianglearea": "م = ½ × القاعدة × الارتفاع",
+  "math::circle": "م = πr²، المحيط = 2πr",
+  "math::volume": "ح = مساحة القاعدة × الارتفاع",
+  "math::surfacearea": "م = مجموع مساحات الأوجه",
+  "math::pythagoras": "أ² + ب² = ج²",
+  "math::angles": "الزاوية القائمة = 90°",
+  "math::complementary": "∠أ + ∠ب = 90° أو 180°",
+  "math::trianglesum": "∠أ + ∠ب + ∠ج = 180°",
+  "math::parallelogram": "م = القاعدة × الارتفاع",
+  "math::trapezoid": "م = ½ × (ق₁ + ق₂) × ع",
+  "math::circumference": "المحيط = 2πr = πd",
+  "math::circlearea": "م = πr²",
+  "math::prismvolume": "ح = مساحة القاعدة × الارتفاع",
+  "math::meanrange": "المدى = أكبر قيمة − أصغر قيمة",
+  "math::probability": "الاحتمال = النواتج المناسبة ÷ النواتج الكلية",
+  "math::experimentalprob": "الاحتمال التجريبي = مرات الحدث ÷ عدد التجارب",
+  "math::slope": "الميل = Δص ÷ Δس",
+  "math::functions": "ص = 2س + 1",
+  "math::conversions": "3/4 = 0.75 = 75%",
+  "math::decimalops": "2.5 + 1.25 = 3.75",
+  "math::comparefractions": "3/4 > 2/3 لأن 9 > 8",
+  "math::simplify": "3س + 2س = 5س",
+  "math::solveequation": "2س + 3 = 11 ← س = 4",
+  "math::metric": "1 km = 1000 m",
+  "math::scale": "الطول الحقيقي = الطول على الخريطة × المقياس",
+  "math::integers": "−3 < 2",
+  "math::orderops": "2 + 3 × 4 = 14",
+  "math::coordinates": "(س، ص)",
+  "math::transformations": "دوران 90°",
+  "math::primefactor": "36 = 2² × 3²",
+  "math::divisibility": "135 ÷ 3 = 45",
+  "math::numberline": "1 < 3 < 5",
+  "science::gravity": "الوزن = الكتلة × 9.8",
+  "science::speed": "السرعة = المسافة ÷ الزمن",
+  "science::force": "القوة = الكتلة × التسارع",
+  "science::newton": "1 N = 1 kg·m/s²",
+  "science::density": "الكثافة = الكتلة ÷ الحجم",
+  "science::work": "الشغل = القوة × المسافة",
+  "science::pressure": "الضغط = القوة ÷ المساحة",
+  "science::temperature": "°C = الدرجة المئوية",
+  "science::heat": "الحرارة تنتقل من الأسخن إلى الأبرد",
+  "science::electricity": "التيار = الشحنة ÷ الزمن",
+  "science::circuits": "V = I × R",
+  "science::ph": "pH < 7 حمضي، pH = 7 متعادل، pH > 7 قاعدي",
+  "science::molecules": "H₂O، O₂، CO₂",
+  "science::massconservation": "كتلة المتفاعلات = كتلة النواتج",
+  "science::energytransform": "الطاقة لا تفنى ولا تُستحدث",
+  "science::kinetic": "الطاقة الحركية = ½ × الكتلة × السرعة²",
+  "science::static": "الشحنة تُقاس بالكولوم C",
+  "science::photosynthesis": "6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂",
+  "science::moon": "دورة القمر ≈ 29.5 يومًا",
+  "science::seasons": "السنة = 365 يومًا",
+  "science::daynight": "دورة الأرض = 24 ساعة",
+  "science::atmosphere": "النيتروجين 78%، الأكسجين 21%",
+  "science::solubility": "الذائبية = غرامات المادة ÷ 100 g ماء"
 };
 
 const SUBJECT_ORDER = ["math", "science", "arabic", "english", "islamic", "social"];
