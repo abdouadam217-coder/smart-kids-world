@@ -11,7 +11,9 @@ const state = {
   historyQuery: "",
   busy: false,
   answerTimer: null,
-  attachments: []
+  attachments: [],
+  quizCount: 4,
+  quizPool: []
 };
 
 const $ = (id) => document.getElementById(id);
@@ -154,7 +156,7 @@ function pickTerms(subjectId, text) {
   const best = scored.length ? scored[0].s : 0;
   const chosen = scored
     .filter((x, i) => i === 0 || x.s >= best * 0.45)
-    .slice(0, 2)
+    .slice(0, 4)
     .map((x) => x.t);
   return { subject, terms: chosen };
 }
@@ -430,19 +432,23 @@ function pointsText(n) {
   return count + " نقطة";
 }
 
+const QUIZ_COUNTS = [4, 6, 8, 10];
+
 function buildQuiz(terms, subjectId) {
   const subject = SUBJECTS[subjectId];
   if (!subject || !terms.length) return [];
-  const others = subject.terms.filter((t) => !terms.some((x) => x.key === t.key));
-  const questions = [];
+  const chosenKeys = new Set(terms.map((t) => t.key));
+  const others = subject.terms.filter((t) => !chosenKeys.has(t.key));
+  const pool = [];
 
-  terms.slice(0, 2).forEach((term, index) => {
-    const seed = hashString(term.key + "::" + index);
+  terms.slice(0, 4).forEach((term, index) => {
+    const seed = hashString(term.key + "::pool::" + index);
     const distractors = seededShuffle(others, seed).slice(0, 3);
+
     const definitionOptions = seededShuffle([term].concat(distractors), seed + 17)
       .map((t) => shortText(t.simple));
     const definitionAnswer = definitionOptions.indexOf(shortText(term.simple));
-    questions.push({
+    pool.push({
       question: "ما معنى «" + term.ar + "»؟",
       options: definitionOptions,
       answer: definitionAnswer,
@@ -450,21 +456,53 @@ function buildQuiz(terms, subjectId) {
       why: "«" + term.ar + "»: " + shortText(term.simple)
     });
 
-    if (index === 0) {
-      const clue = definitionClue(term);
-      const nameOptions = seededShuffle([term].concat(distractors), seed + 31).map((t) => t.ar);
-      const nameAnswer = nameOptions.indexOf(term.ar);
-      questions.push({
-        question: "أي مصطلح يطابق هذا التعريف: «" + clue + "»؟",
-        options: nameOptions,
-        answer: nameAnswer,
+    const clue = definitionClue(term);
+    const nameOptions = seededShuffle([term].concat(distractors), seed + 31).map((t) => t.ar);
+    const nameAnswer = nameOptions.indexOf(term.ar);
+    pool.push({
+      question: "أي مصطلح يطابق هذا التعريف: «" + clue + "»؟",
+      options: nameOptions,
+      answer: nameAnswer,
+      difficulty: "متوسط",
+      why: "«" + term.ar + "»: " + shortText(term.simple)
+    });
+
+    const exampleLine = exampleText(term);
+    if (exampleLine) {
+      const exampleOptions = seededShuffle([term].concat(distractors), seed + 47).map((t) => t.ar);
+      const exampleAnswer = exampleOptions.indexOf(term.ar);
+      pool.push({
+        question: "أي مصطلح ينطبق عليه هذا المثال: «" + shortText(exampleLine) + "»؟",
+        options: exampleOptions,
+        answer: exampleAnswer,
         difficulty: "متوسط",
         why: "«" + term.ar + "»: " + shortText(term.simple)
       });
     }
   });
 
-  return questions;
+  const seen = new Set();
+  const unique = pool.filter((q) => {
+    if (seen.has(q.question)) return false;
+    seen.add(q.question);
+    return true;
+  });
+
+  return seededShuffle(unique, hashString(terms.map((t) => t.key).join("|") + subjectId));
+}
+
+function quizCounts(total) {
+  const list = QUIZ_COUNTS.filter((n) => n < total);
+  list.push(total);
+  return list.filter((n, i, arr) => n > 0 && arr.indexOf(n) === i).sort((a, b) => a - b);
+}
+
+function quizCountFor(total) {
+  const available = quizCounts(total);
+  const saved = Number(state.quizCount) || 4;
+  if (available.indexOf(saved) !== -1) return saved;
+  const next = available.find((n) => n >= saved);
+  return next || available[available.length - 1];
 }
 
 function difficultyClass(difficulty) {
@@ -473,8 +511,17 @@ function difficultyClass(difficulty) {
   return "diff-easy";
 }
 
-function quizHTML(questions) {
-  if (!questions.length) return "";
+function quizHTML(pool) {
+  if (!pool || !pool.length) return "";
+  const total = pool.length;
+  const count = quizCountFor(total);
+  const questions = pool.slice(0, count);
+  const buttons = quizCounts(total).map((n) => {
+    const label = n === total ? "الكل (" + total + ")" : String(n);
+    const active = n === count ? " is-active" : "";
+    return '<button type="button" class="quiz-count-btn' + active + '" data-count="' + n + '" aria-pressed="' + (n === count) + '">' + label + "</button>";
+  }).join("");
+
   const items = questions.map((q, index) => {
     const options = q.options.map((option, optionIndex) =>
       '<button type="button" class="quiz-option" data-index="' + optionIndex + '">' +
@@ -493,15 +540,24 @@ function quizHTML(questions) {
     "</li>";
   }).join("");
 
-  return '<section class="quiz-card" data-quiz data-total="' + questions.length +
+  return '<section class="quiz-card" data-quiz data-total="' + count +
     '" data-answered="0" data-logged="false">' +
     '<div class="quiz-head">' +
       '<h3 class="card-title">' + ICON_BRAIN + " اختبر فهمك</h3>" +
-      '<span class="quiz-progress">0 من ' + questions.length + "</span>" +
+      '<span class="quiz-progress">0 من ' + count + "</span>" +
+    "</div>" +
+    '<div class="quiz-count" role="group" aria-label="عدد الأسئلة">' +
+      '<span class="quiz-count-label">عدد الأسئلة:</span>' + buttons +
     "</div>" +
     '<ol class="quiz-list">' + items + "</ol>" +
     '<p class="quiz-score" hidden></p>' +
   "</section>";
+}
+
+function renderQuizArea() {
+  const wrap = $("quizWrap");
+  if (!wrap) return;
+  wrap.innerHTML = quizHTML(state.quizPool || []);
 }
 
 /* ---------- المرفقات (صورة أو ملف نصي مع السؤال) ---------- */
@@ -814,6 +870,9 @@ async function handleSourceFiles(files) {
 /* ---------- بناء الإجابة ---------- */
 function buildAnswerData(subjectId, question) {
   const { subject, terms } = pickTerms(subjectId, question);
+  const chosenKeys = new Set(terms.map((t) => t.key));
+  const others = subject.terms.filter((t) => !chosenKeys.has(t.key));
+  const moreTerms = seededShuffle(others, hashString(question + "::more::" + subject.id)).slice(0, 3);
   if (!terms.length) {
     return {
       fallback: true,
@@ -822,6 +881,7 @@ function buildAnswerData(subjectId, question) {
       grade: state.grade,
       question,
       terms: [],
+      moreTerms: [],
       bullets: [],
       example: "",
       suggestions: (SUGGESTIONS[subject.id] || []).slice(0, 6)
@@ -856,6 +916,7 @@ function buildAnswerData(subjectId, question) {
     grade: state.grade,
     question,
     terms,
+    moreTerms,
     lead: intentLead(intent),
     bullets: bullets.slice(0, 4),
     example: exampleText(terms[0]),
@@ -868,6 +929,12 @@ function buildAnswerData(subjectId, question) {
   };
 }
 
+function termFormulaHTML(t) {
+  const formula = TERM_FORMULAS[t.key];
+  if (!formula) return "";
+  return '<p class="term-formula"><span class="term-formula-label">بالرموز:</span> <span dir="auto">' + esc(formula) + "</span></p>";
+}
+
 function termCardHTML(t) {
   return `
     <article class="term-card" data-term-key="${esc(t.key)}">
@@ -876,6 +943,7 @@ function termCardHTML(t) {
         <span class="term-en" dir="ltr">${esc(t.en)}</span>
       </div>
       <p class="term-simple">${esc(t.simple)}</p>
+      ${termFormulaHTML(t)}
       <p class="term-example"><strong>مثال: </strong>${esc(exampleText(t))}</p>
       <div class="term-actions">
         <button type="button" class="btn-outline btn-sm explain-btn" aria-expanded="false">
@@ -889,6 +957,79 @@ function termCardHTML(t) {
         <p>${esc(t.easier)}</p>
       </div>
     </article>`;
+}
+
+function symbolsFor(subjectId, terms, question) {
+  const list = SCI_SYMBOLS[subjectId];
+  if (!list) return [];
+  const hay = normalize(
+    [question].concat(terms.map((t) => [t.ar, t.en, (t.keywords || []).join(" ")].join(" "))).join(" ")
+  );
+  const scored = list.map((item, index) => {
+    let score = 0;
+    for (const word of item.match || []) {
+      const key = normalize(word);
+      if (!key) continue;
+      if (/^[a-z]/.test(key)) {
+        if (hasPhrase(hay, key)) score += 2;
+      } else if (hay.includes(key)) {
+        score += 2;
+      }
+    }
+    return { item, score, index };
+  });
+  const relevant = scored
+    .filter((x) => x.score > 0)
+    .sort((a, b) => (b.score - a.score) || (a.index - b.index))
+    .slice(0, 6)
+    .map((x) => x.item);
+
+  /* في الرياضيات نكمل بالعمليات الأساسية حتى لا تبدو البطاقة فارغة */
+  if (relevant.length && relevant.length < 4 && subjectId === "math") {
+    for (const symbol of ["×", "÷", "+", "−", "="]) {
+      if (relevant.length >= 4) break;
+      const found = list.find((x) => x.s === symbol);
+      if (found && relevant.indexOf(found) === -1) relevant.push(found);
+    }
+  }
+  return relevant;
+}
+
+function symbolsHTML(subjectId, terms, question) {
+  const items = symbolsFor(subjectId, terms, question);
+  if (!items.length) return "";
+  const cells = items.map((item) =>
+    '<div class="symbol-item">' +
+      '<span class="symbol-char" dir="ltr">' + esc(item.s) + "</span>" +
+      '<span class="symbol-body">' +
+        '<span class="symbol-ar">' + esc(item.ar) + "</span>" +
+        '<span class="symbol-en" dir="ltr">' + esc(item.en) + "</span>" +
+        '<span class="symbol-ex" dir="auto">' + esc(item.ex) + "</span>" +
+      "</span>" +
+    "</div>"
+  ).join("");
+  return '<div class="symbols-card">' +
+    '<h3 class="card-title">' + ICON_SPARKLES + " رموز علمية</h3>" +
+    '<p class="symbols-hint">رموز قد تصادفها في درسك، ومعها معناها ومثال سريع.</p>' +
+    '<div class="symbols-grid">' + cells + "</div>" +
+  "</div>";
+}
+
+function moreExamplesHTML(data) {
+  if (!data.moreTerms || !data.moreTerms.length) return "";
+  const cards = data.moreTerms.map((t) =>
+    '<button type="button" class="more-card" data-ask="' + esc(t.ar) + '">' +
+      '<span class="more-term">' + esc(t.ar) +
+        ' <span class="more-en" dir="ltr">' + esc(t.en) + "</span>" +
+      "</span>" +
+      '<span class="more-text">' + esc(exampleText(t)) + "</span>" +
+    "</button>"
+  ).join("");
+  return '<div class="more-examples">' +
+    '<p class="more-title">أمثلة أخرى في ' + esc(data.subjectName) + "</p>" +
+    '<div class="more-grid">' + cards + "</div>" +
+    '<p class="more-hint">اضغط أي مثال لتحوّله إلى سؤال جديد.</p>' +
+  "</div>";
 }
 
 function renderAnswer(data) {
@@ -969,7 +1110,13 @@ function renderAnswer(data) {
           '<div class="terms-grid">' + data.terms.map(termCardHTML).join("") + "</div>" +
         "</div>";
 
-      html += quizHTML(buildQuiz(data.terms, data.subjectId));
+      html += symbolsHTML(data.subjectId, data.terms, (data.searchText || "") + " " + data.question);
+      html += moreExamplesHTML(data);
+
+      state.quizPool = buildQuiz(data.terms, data.subjectId);
+      html += '<div id="quizWrap">' + quizHTML(state.quizPool) + "</div>";
+    } else {
+      state.quizPool = [];
     }
   }
 
@@ -2407,6 +2554,10 @@ function init() {
   renderWeak();
   initSpeechInput();
   initTextSize();
+  try {
+    const savedQuizCount = Number(localStorage.getItem("skw_quizcount"));
+    if (savedQuizCount > 0) state.quizCount = savedQuizCount;
+  } catch (e) {}
 
   const savedStudent = readSavedStudent();
   const nameInput = $("loginUsername");
@@ -2462,6 +2613,25 @@ function init() {
       const explain = event.target.closest(".explain-btn");
       if (explain) {
         toggleTermExplain(explain);
+        return;
+      }
+      const quizCount = event.target.closest(".quiz-count-btn");
+      if (quizCount) {
+        const count = Number(quizCount.dataset.count);
+        if (count > 0) {
+          state.quizCount = count;
+          try { localStorage.setItem("skw_quizcount", String(count)); } catch (e) {}
+          renderQuizArea();
+        }
+        return;
+      }
+      const moreCard = event.target.closest("[data-ask]");
+      if (moreCard) {
+        const input = $("questionInput");
+        if (!input) return;
+        input.value = "ما هو " + moreCard.dataset.ask + "؟";
+        input.focus();
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
       const quizOption = event.target.closest(".quiz-option");
